@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reset Password - Assiya App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 350px;
+            text-align: center;
+        }
+
+        .container h2 {
+            margin-bottom: 20px;
+            color: #61dafb;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background-color: #61dafb;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #21a1f1;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .success {
+            color: #4caf50;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔒</div>
+        <h2>Reset your password</h2>
+        <form method="POST" onsubmit="return validatePassword()">
+            <input type="password" id="password" name="password" placeholder="New Password" required>
+            <input type="password" id="confirm" name="confirm" placeholder="Confirm Password" required>
+            <div id="message" class="error"></div>
+            <button type="submit">Update Password</button>
+        </form>
+        <div id="successMsg" class="success" style="display: none;">🎉 Congratulations! Your password has been successfully reset!</div>
+    </div>
+
+    <canvas id="confettiCanvas" class="confetti"></canvas>
+
+    <script>
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm').value;
+            const message = document.getElementById('message');
+            const successMsg = document.getElementById('successMsg');
+
+            const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+            if (!pattern.test(password)) {
+                message.textContent = "Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol.";
+                return false;
+            }
+
+            if (password !== confirm) {
+                message.textContent = "Passwords do not match!";
+                return false;
+            }
+
+            // Clear errors and show success
+            message.textContent = "";
+            successMsg.style.display = "block";
+            launchConfetti();
+            return true;
+        }
+
+        // Mini confetti simulation 🎉
+        function launchConfetti() {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animation = 'fall 2s linear';
+                document.body.appendChild(confetti);
+
+                setTimeout(() => document.body.removeChild(confetti), 2000);
+            }, 100);
+        }
+    </script>
+
+    <style>
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ calc_type.capitalize() }} History - Assiyaton</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --success: #27ae60;
+            --info: #3498db;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header-title i {
+            font-size: 36px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-logout {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .content-title {
+            font-size: 26px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .content-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #7f8c8d;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #95a5a6;
+            margin-bottom: 30px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Calculation Card */
+        .calculation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .calculation-item {
+            background: #f8f9fa;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+        }
+
+        .calculation-item:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+        }
+
+        .calculation-info {
+            flex: 1;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .calculation-title {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 16px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .calculation-item:hover .calculation-title {
+            color: var(--secondary);
+        }
+
+        .calculation-date {
+            font-size: 12px;
+            color: #95a5a6;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .calculation-badge {
+            display: inline-block;
+            background: var(--info);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .calculation-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn-edit {
+            background: var(--info);
+            color: white;
+        }
+
+        .action-btn-edit:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-delete {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .action-btn-delete:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-view {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-btn-view:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-title {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .calculation-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .calculation-actions {
+                width: 100%;
+            }
+
+            .content-title {
+                font-size: 20px;
+            }
+        }
+
+        /* Modal Confirmation */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-body {
+            color: #555;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-cancel {
+            background: #ecf0f1;
+            color: #555;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #bdc3c7;
+        }
+
+        .modal-btn-confirm {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="header">
+            <div class="header-title">
+                {% if calc_type == 'absorption' %}
+                    <i class="bi bi-droplet-fill"></i> Absorption History
+                {% else %}
+                    <i class="bi bi-wind"></i> Desorption History
+                {% endif %}
+            </div>
+            <div class="header-nav">
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <form method="POST" action="/logout" style="display: inline;">
+                    <button type="submit" class="btn btn-logout" onclick="return confirm('Are you sure?')">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1 class="content-title">
+                {% if calc_type == 'absorption' %}
+                    <i class="bi bi-clock-history"></i> Your Absorption Calculations
+                {% else %}
+                    <i class="bi bi-clock-history"></i> Your Desorption Calculations
+                {% endif %}
+            </h1>
+            <p class="content-subtitle">View, modify, or delete your previous calculations</p>
+
+            {% if calculations %}
+                <div class="calculation-list">
+                    {% for calc in calculations %}
+                        <div class="calculation-item">
+                            <div class="calculation-info" onclick="viewCalculation({{ calc.id }})">
+                                <div class="calculation-title">
+                                    <i class="bi bi-calculator"></i> {{ calc.title }}
+                                </div>
+                                <div class="calculation-date">
+                                    <i class="bi bi-calendar-event"></i>
+                                    {% set dt = calc.timestamp.strftime('%d/%m/%Y %H:%M:%S') %}
+                                    {{ dt }}
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <span class="calculation-badge">{{ calc.mode.upper() }}</span>
+                                </div>
+                            </div>
+                            <div class="calculation-actions">
+                                <button class="action-btn action-btn-view" onclick="viewCalculation({{ calc.id }})">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                <button class="action-btn action-btn-edit" onclick="editCalculation({{ calc.id }})">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
+                                <a href="/rapport/{{ calc.id }}" class="action-btn" style="background: #3498db; color: white; text-decoration: none;">
+                                    <i class="bi bi-file-pdf"></i> Report
+                                </a>
+                                <button class="action-btn action-btn-delete" onclick="showDeleteModal({{ calc.id }}, '{{ calc.title }}')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox"></i>
+                    <h3>No Calculations Found</h3>
+                    <p>You haven't made any {{ calc_type }} calculations yet</p>
+                    {% if calc_type == 'absorption' %}
+                        <a href="/absorption" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Absorption Calculation
+                        </a>
+                    {% else %}
+                        <a href="/formulaire" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Desorption Calculation
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="bi bi-exclamation-triangle" style="color: var(--secondary);"></i>
+                Confirm Deletion
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this calculation?</p>
+                <p id="deleteTitle" style="font-weight: 600; color: var(--primary); margin-top: 10px;"></p>
+                <p style="margin-top: 15px; font-size: 12px; color: #95a5a6;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let deleteCalcId = null;
+
+        function viewCalculation(calcId) {
+            window.location.href = `/historique/view/${calcId}`;
+        }
+
+        function editCalculation(calcId) {
+            window.location.href = `/historique/edit/${calcId}`;
+        }
+
+        function showDeleteModal(calcId, title) {
+            deleteCalcId = calcId;
+            document.getElementById('deleteTitle').textContent = title;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            deleteCalcId = null;
+        }
+
+        function confirmDelete() {
+            if (deleteCalcId) {
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/historique/delete/${deleteCalcId}`;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

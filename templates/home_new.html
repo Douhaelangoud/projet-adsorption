@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-container">
+    <h1>{{ app_name }}</h1>
+    <p class="subtitle">{{ gettext('app_subtitle') }}</p>
+    
+    <p style="font-size: 16px; color: #555; line-height: 1.8; margin: 30px 0;">
+        {{ app_description }}
+    </p>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-droplet-fill"></i></div>
+            <div class="feature-title">{{ gettext('absorption_calculation') }}</div>
+            <div class="feature-text">
+                {{ gettext('liquid_flow_rate') }} & {{ gettext('gas_flow_rate') }} calculations using McCabe-Thiele method.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-cloud-upload"></i></div>
+            <div class="feature-title">{{ gettext('desorption_calculation') }}</div>
+            <div class="feature-text">
+                Advanced desorption analysis with optimal stage determination.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="feature-title">{{ gettext('history') }}</div>
+            <div class="feature-text">
+                Keep track of all your calculations with detailed history and reports.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-file-pdf"></i></div>
+            <div class="feature-title">PDF {{ gettext('download') }}</div>
+            <div class="feature-text">
+                Generate professional reports with interpretations and visualizations.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-graph-up"></i></div>
+            <div class="feature-title">Visualization</div>
+            <div class="feature-text">
+                Interactive McCabe-Thiele diagrams for better understanding.
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-globe"></i></div>
+            <div class="feature-title">{{ gettext('multilingual') | default('Multilingual') }}</div>
+            <div class="feature-text">
+                Available in English, French, and Spanish languages.
+            </div>
+        </div>
+    </div>
+
+    <div class="button-group">
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                <i class="bi bi-graph-up"></i> {{ gettext('dashboard') }}
+            </a>
+            <a href="{{ url_for('absorption') }}" class="btn btn-primary">
+                <i class="bi bi-droplet"></i> {{ gettext('absorption') }}
+            </a>
+            <a href="{{ url_for('formulaire') }}" class="btn btn-primary">
+                <i class="bi bi-cloud-upload"></i> {{ gettext('desorption') }}
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-right"></i> {{ gettext('login') }}
+            </a>
+            <a href="{{ url_for('signup') }}" class="btn btn-secondary">
+                <i class="bi bi-person-plus"></i> {{ gettext('signup') }}
+            </a>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 60px; padding: 30px; background: rgba(26, 188, 156, 0.05); border-radius: 15px; border-left: 4px solid var(--secondary);">
+        <h2 style="color: var(--primary); margin-bottom: 15px; font-size: 24px;">McCabe-Thiele Method</h2>
+        <p style="color: #666; line-height: 1.8;">
+            This calculator uses the McCabe-Thiele graphical method, a fundamental technique in separation engineering.
+            It provides accurate calculations for both absorption and desorption processes, helping you determine the number
+            of theoretical stages required or predict outlet concentrations for given stage configurations.
+        </p>
+    </div>
+</div>
+{% endblock %}

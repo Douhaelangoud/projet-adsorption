@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultat du Calcul de Désorption</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #1abc9c;
+            --dark: #1a252f;
+            --light: #ecf0f1;
+            --header-height: 70px;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: #333;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #f5f5f5;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--primary);
+            color: white;
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--secondary);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: calc(var(--header-height) + 2rem) auto 2rem;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode h1 {
+            color: var(--secondary);
+        }
+
+        .info-box {
+            background-color: #ecf8f5;
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .dark-mode .info-box {
+            background-color: rgba(26, 188, 156, 0.1);
+            color: #f5f5f5;
+        }
+
+        .info-box strong {
+            color: var(--primary);
+        }
+
+        .dark-mode .info-box strong {
+            color: var(--secondary);
+        }
+
+        .info-box p {
+            margin: 0.5rem 0;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            border-top: 4px solid var(--secondary);
+        }
+
+        .dark-mode .result-card {
+            background-color: #1e1e1e;
+        }
+
+        .result-card h3 {
+            color: var(--primary);
+            margin: 0 0 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dark-mode .result-card h3 {
+            color: #f5f5f5;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            margin: 0.5rem 0;
+        }
+
+        .result-unit {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        .dark-mode .result-unit {
+            color: #ccc;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .dark-mode .chart-section {
+            background-color: #1e1e1e;
+        }
+
+        .chart-section h2 {
+            color: var(--primary);
+            margin-top: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .dark-mode .chart-section h2 {
+            color: var(--secondary);
+        }
+
+        .chart-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* Table */
+        .table-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .dark-mode .table-section {
+            background-color: #1e1e1e;
+        }
+
+        .table-section h2 {
+            color: var(--primary);
+            margin-top: 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .dark-mode .table-section h2 {
+            color: var(--secondary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .dark-mode th {
+            background-color: var(--secondary);
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .dark-mode td {
+            border-bottom: 1px solid #444;
+        }
+
+        tr:hover {
+            background-color: rgba(26, 188, 156, 0.05);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        a.btn, button {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #15a089;
+            box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin-top: calc(var(--header-height) + 1rem);
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            a.btn, button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="bi bi-atom logo-icon"></i>
+            <span>Assiyaton</span>
+        </div>
+        
+        <nav>
+            <a href="/dashboard" class="nav-link">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="/formulaire" class="nav-link">
+                <i class="bi bi-calculator"></i> New Calculation
+            </a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Saved Notification -->
+        {% if resultats.saved %}
+        <div style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; padding: 1rem; border-radius: 10px; margin-bottom: 2rem; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);">
+            <i class="bi bi-check-circle" style="font-size: 1.5rem;"></i>
+            <div>
+                <strong style="font-size: 1.1rem;">✓ Calculation Saved Successfully!</strong>
+                <br>
+                <span style="font-size: 0.9rem; opacity: 0.95;">This calculation has been automatically saved to your history and can be accessed anytime.</span>
+            </div>
+            <a href="/historique-{{ resultats.calculation_type }}" style="margin-left: auto; background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                View History <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+
+        {% if resultats.calculation_type == 'absorption' %}
+            <h1>📊 Absorption Results</h1>
+            
+            <!-- Absorption Info Box -->
+            <div class="info-box" style="background-color: #f3e5f5; border-left-color: #9c27b0;">
+                <strong>✓ McCabe-Thiele Method</strong>
+                <p>Liquid Flow Rate (L): <strong>{{ resultats.L }}</strong></p>
+                <p>Gas Flow Rate (G): <strong>{{ resultats.G }}</strong></p>
+                <p>Initial Concentration (Y0): <strong>{{ resultats.Y0 }}%</strong></p>
+                <p>Stages Calculated: <strong>{{ resultats.num_stages }}</strong></p>
+            </div>
+
+            <!-- Absorption Results Cards -->
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Slope (L/G)</h3>
+                    <div class="result-value">{{ resultats.slope }}</div>
+                    <div class="result-unit">Operational Slope</div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Initial Y</h3>
+                    <div class="result-value">{{ resultats.Y0 }}%</div>
+                    <div class="result-unit">Inlet Concentration</div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Final Y</h3>
+                    <div class="result-value">{{ resultats.final_Y }}%</div>
+                    <div class="result-unit">Outlet Concentration</div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Efficiency</h3>
+                    <div class="result-value">{{ resultats.efficiency }}%</div>
+                    <div class="result-unit">Absorption Efficiency</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            {% if resultats.plot_url %}
+            <div class="chart-section">
+                <h2><i class="bi bi-graph-up"></i> McCabe-Thiele Diagram</h2>
+                <img src="data:image/png;base64,{{ resultats.plot_url }}" alt="Absorption diagram" class="chart-image">
+            </div>
+            {% endif %}
+
+            <!-- Data Table for Absorption -->
+            <div class="table-section">
+                <h2><i class="bi bi-table"></i> Stage Calculations</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Stage</th>
+                            <th>X (Liquid)</th>
+                            <th>Y (Gas - Equilibrium)</th>
+                            <th>Y (Operational)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stage in resultats.stages %}
+                        <tr>
+                            <td><strong>{{ stage.stage }}</strong></td>
+                            <td>{{ stage.X }}</td>
+                            <td>{{ stage.Y }}</td>
+                            <td>{{ stage.Y_operational }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <h1>📊 Desorption Results</h1>
+            
+            <!-- Mode Display -->
+            {% if resultats.mode == 'etages' %}
+            <div class="info-box" style="background-color: #e8f5e9; border-left-color: #4caf50;">
+                <strong>✓ Mode: Known Stages</strong>
+                <p>Number of stages provided: <strong>{{ resultats.N_etages }}</strong></p>
+            </div>
+            {% else %}
+            <div class="info-box" style="background-color: #e3f2fd; border-left-color: #2196f3;">
+                <strong>✓ Mode: Target Achieved</strong>
+                <p>Required stages calculated: <strong>{{ resultats.N_etages }}</strong> stages needed</p>
+                <p>Final concentration: <strong>{{ resultats.x_final }}</strong></p>
+            </div>
+            {% endif %}
+
+            <!-- Results Cards -->
+            <div class="results-grid">
+                <div class="result-card">
+                    <h3>Desorption Factor</h3>
+                    <div class="result-value">{{ resultats.S }}</div>
+                    <div class="result-unit">S = (G' × m) / L</div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Efficiency</h3>
+                    <div class="result-value">{{ resultats.rendement }}%</div>
+                    <div class="result-unit">Process Efficiency</div>
+                </div>
+
+                <div class="result-card">
+                    <h3>Number of Stages</h3>
+                    <div class="result-value">{{ resultats.N_etages }}</div>
+                    {% if resultats.mode == 'objectif' %}
+                    <div class="result-unit">Calculated for Target</div>
+                    {% else %}
+                    <div class="result-unit">Separation Levels</div>
+                    {% endif %}
+                </div>
+
+                <div class="result-card">
+                    <h3>Final Concentration</h3>
+                    <div class="result-value">{{ resultats.x_final }}</div>
+                    <div class="result-unit">x at output</div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+        {% if resultats.plot_url %}
+        <div class="chart-section">
+            <h2><i class="bi bi-graph-up"></i> Desorption Chart</h2>
+            <img src="data:image/png;base64,{{ resultats.plot_url }}" alt="Desorption chart" class="chart-image">
+        </div>
+        {% endif %}
+
+        <!-- Data Table -->
+        <div class="table-section">
+            <h2><i class="bi bi-table"></i> Stage Data</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Inlet x</th>
+                        <th>Outlet x</th>
+                        <th>Reduction (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(resultats.N_etages) %}
+                    <tr>
+                        <td><strong>{{ resultats.etages[i] }}</strong></td>
+                        <td>{{ resultats.x_entrant[i] }}</td>
+                        <td>{{ resultats.x_sortant[i] }}</td>
+                        <td>{% if resultats.x_entrant[i] > 0 %}{{ "%.2f" | format((resultats.x_entrant[i] - resultats.x_sortant[i]) / resultats.x_entrant[i] * 100) }}{% else %}0{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <!-- Rapport and History buttons -->
+            <a href="/rapport/{{ resultats.calculation_id }}" class="btn btn-primary" title="Generate and download PDF report">
+                <i class="bi bi-file-pdf"></i> Download Report (PDF)
+            </a>
+            <a href="/historique-{{ resultats.calculation_type }}" class="btn btn-secondary" title="View calculation history">
+                <i class="bi bi-clock-history"></i> View History
+            </a>
+            
+            <!-- New Calculation buttons -->
+            {% if resultats.calculation_type == 'absorption' %}
+                <a href="/absorption" class="btn btn-primary">
+                    <i class="bi bi-calculator"></i> New Absorption Calculation
+                </a>
+                <a href="/formulaire" class="btn btn-secondary">
+                    <i class="bi bi-cloud-download"></i> Try Desorption
+                </a>
+            {% else %}
+                <a href="/formulaire" class="btn btn-primary">
+                    <i class="bi bi-calculator"></i> New Desorption Calculation
+                </a>
+                <a href="/absorption" class="btn btn-secondary">
+                    <i class="bi bi-droplet"></i> Try Absorption
+                </a>
+            {% endif %}
+            <a href="/dashboard" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

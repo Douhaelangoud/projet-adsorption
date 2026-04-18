@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Calculation - Assiyaton</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-logout {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .content-title {
+            font-size: 26px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 14px;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 14px 35px;
+            font-size: 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+            padding: 14px 35px;
+            font-size: 16px;
+            border-radius: 30px;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-title {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="header">
+            <div class="header-title">
+                <i class="bi bi-pencil-square"></i> Edit Calculation
+            </div>
+            <div class="header-nav">
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <form method="POST" action="/logout" style="display: inline;">
+                    <button type="submit" class="btn btn-logout" onclick="return confirm('Are you sure?')">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1 class="content-title">Edit Calculation Details</h1>
+
+            <div class="info-box">
+                <i class="bi bi-info-circle"></i>
+                <strong>Info:</strong> You can modify the calculation parameters and the results will be automatically recalculated.
+            </div>
+
+            <form method="POST" id="editForm">
+                <div class="form-group">
+                    <label for="title">Calculation Title</label>
+                    <input type="text" id="title" name="title" value="{{ calculation.title }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Calculation Type</label>
+                    <input type="text" value="{{ calculation.calculation_type.upper() }}" readonly style="background: #ecf0f1; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Mode</label>
+                    <input type="text" value="{{ calculation.mode.upper() }}" readonly style="background: #ecf0f1; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label>Calculation Date</label>
+                    <input type="text" value="{{ calculation.timestamp.strftime('%d/%m/%Y %H:%M:%S') }}" readonly style="background: #ecf0f1; cursor: not-allowed;">
+                </div>
+
+                <!-- ABSORPTION PARAMETERS -->
+                {% if calculation.calculation_type == 'absorption' %}
+                    <div style="border-top: 2px solid #ecf0f1; padding-top: 25px; margin-top: 25px;">
+                        <h3 style="color: var(--primary); margin-bottom: 20px; font-size: 18px;">
+                            <i class="bi bi-droplet"></i> Calculation Parameters
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="L">Liquid Flow Rate (L)</label>
+                            <input type="number" id="L" name="L" value="{{ params.L }}" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="G">Gas Flow Rate (G)</label>
+                            <input type="number" id="G" name="G" value="{{ params.G }}" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="yo">Initial Concentration (yo)</label>
+                            <input type="number" id="yo" name="yo" value="{{ params.yo }}" step="0.001" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Absorption Mode</label>
+                            <input type="hidden" name="absorption_mode" id="absorption_mode" value="{{ params.mode }}">
+                            <input type="text" value="{{ params.mode.upper() }}" readonly style="background: #ecf0f1; cursor: not-allowed;">
+                        </div>
+
+                        {% if params.mode == 'stages' %}
+                        <div class="form-group">
+                            <label for="num_stages">Number of Stages</label>
+                            <input type="number" id="num_stages" name="num_stages" value="{{ params.num_stages }}" step="1" min="1" required>
+                        </div>
+                        {% else %}
+                        <div class="form-group">
+                            <label for="y_target">Target Concentration (y_target)</label>
+                            <input type="number" id="y_target" name="y_target" value="{{ params.y_target }}" step="0.001" required>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                <!-- DESORPTION PARAMETERS -->
+                {% elif calculation.calculation_type == 'desorption' %}
+                    <div style="border-top: 2px solid #ecf0f1; padding-top: 25px; margin-top: 25px;">
+                        <h3 style="color: var(--primary); margin-bottom: 20px; font-size: 18px;">
+                            <i class="bi bi-cloud-upload"></i> Calculation Parameters
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="G_prime">Gas Flow Rate (G')</label>
+                            <input type="number" id="G_prime" name="G_prime" value="{{ params.G_prime }}" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="m">Sorbent Mass (m)</label>
+                            <input type="number" id="m" name="m" value="{{ params.m }}" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="L">Liquid Flow Rate (L)</label>
+                            <input type="number" id="L" name="L" value="{{ params.L }}" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="x0">Initial Concentration (x0)</label>
+                            <input type="number" id="x0" name="x0" value="{{ params.x0 }}" step="0.001" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Desorption Mode</label>
+                            <input type="hidden" name="mode" id="mode" value="{{ params.mode }}">
+                            <input type="text" value="{{ params.mode.upper() }}" readonly style="background: #ecf0f1; cursor: not-allowed;">
+                        </div>
+
+                        {% if params.mode == 'stages' %}
+                        <div class="form-group">
+                            <label for="N_etages">Number of Stages</label>
+                            <input type="number" id="N_etages" name="N_etages" value="{{ params.get('N_etages', 3) }}" step="1" min="1" required>
+                        </div>
+                        {% else %}
+                        <div class="form-group">
+                            <label for="x_objectif">Target Concentration (x_objectif)</label>
+                            <input type="number" id="x_objectif" name="x_objectif" value="{{ params.get('x_objectif', 0.001) }}" step="0.001" required>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="notes">Notes (Optional)</label>
+                    <textarea id="notes" name="notes" placeholder="Add any notes about this calculation..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <a href="/historique-{{ calculation.calculation_type }}" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Recalculate & Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // For now, just redirect back to history
+            window.location.href = '/historique-{{ calculation.calculation_type }}';
+        });
+    </script>
+</body>
+</html>

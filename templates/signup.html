@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - UNIFAC Calculator</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #1abc9c;
+            --dark: #1a252f;
+            --light: #ecf0f1;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: #333;
+            transition: all 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #f5f5f5;
+            --light: #1e1e1e;
+            --primary: #0d47a1;
+            --secondary: #00bcd4;
+        }
+
+        /* Scientific Background Pattern */
+        .scientific-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(26, 188, 156, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(52, 152, 219, 0.05) 0%, transparent 20%);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .dark-mode .scientific-bg {
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 188, 212, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(25, 118, 210, 0.05) 0%, transparent 20%);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(26, 188, 156, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1001;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Signup Container */
+        .signup-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dark-mode .signup-container {
+            background-color: #1e1e1e;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            padding: 2rem;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        .welcome-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .dark-mode .welcome-title {
+            color: var(--secondary);
+        }
+
+        .welcome-text {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Question Section */
+        .question-section {
+            display: none;
+            padding: 2rem;
+        }
+
+        .question-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            position: relative;
+        }
+
+        .dark-mode .question-title {
+            color: var(--secondary);
+        }
+
+        .question-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 2px solid rgba(26, 188, 156, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: transparent;
+        }
+
+        .option-btn:hover {
+            border-color: var(--secondary);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(26, 188, 156, 0.2);
+        }
+
+        .option-btn i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .option-btn.selected {
+            background-color: rgba(26, 188, 156, 0.1);
+            border-color: var(--secondary);
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #16a085;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        /* Signup Form */
+        .signup-form {
+            display: none;
+            text-align: left;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(26, 188, 156, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+        }
+
+        .password-hint {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .dark-mode .password-hint {
+            color: #aaa;
+        }
+
+        /* Validation Styles */
+        .form-control.invalid {
+            border-color: #e74c3c !important;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        .form-control.valid {
+            border-color: #27ae60 !important;
+            background-color: rgba(39, 174, 96, 0.1);
+        }
+
+        .validation-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .dark-mode .validation-container {
+            background-color: #2a2a2a;
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+        }
+
+        .dark-mode .validation-item {
+            color: #aaa;
+        }
+
+        .validation-item.valid {
+            color: #27ae60;
+        }
+
+        .validation-item.invalid {
+            color: #e74c3c;
+        }
+
+        .validation-icon {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .email-error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .submit-btn:not(:disabled):hover {
+            background-color: #16a085;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .signup-container {
+                margin: 80px auto;
+                padding: 1.5rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                margin: 60px 15px;
+                padding: 1rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+            
+            .question-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scientific Background -->
+    <div class="scientific-bg"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Signup Container -->
+    <div class="signup-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section" id="welcomeSection">
+            <i class="bi bi-emoji-heart-eyes welcome-icon"></i>
+            <h1 class="welcome-title">Bienvenue sur UNIFAC Calculator</h1>
+            <p class="welcome-text">
+                Nous sommes ravis de vous accueillir ! Répondez à quelques questions rapides
+                pour personnaliser votre expérience avant de créer votre compte.
+            </p>
+            <button class="btn btn-primary" id="startBtn">Commencer <i class="bi bi-arrow-right"></i></button>
+        </div>
+
+        <!-- Question 1: How did you hear about us? -->
+        <div class="question-section" id="question1">
+            <h2 class="question-title">Comment nous avez-vous connu ?</h2>
+            <div class="options-container">
+                <button class="option-btn" data-value="google">
+                    <i class="bi bi-google"></i>
+                    <span>Google</span>
+                </button>
+                <button class="option-btn" data-value="linkedin">
+                    <i class="bi bi-linkedin"></i>
+                    <span>LinkedIn</span>
+                </button>
+                <button class="option-btn" data-value="facebook">
+                    <i class="bi bi-facebook"></i>
+                    <span>Facebook</span>
+                </button>
+                <button class="option-btn" data-value="twitter">
+                    <i class="bi bi-twitter"></i>
+                    <span>Twitter</span>
+                </button>
+                <button class="option-btn" data-value="friends">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Amis/Collegues</span>
+                </button>
+                <button class="option-btn" data-value="other">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Autre</span>
+                </button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-outline" id="backToWelcome1"><i class="bi bi-arrow-left"></i> Retour</button>
+                <button class="btn btn-primary" id="nextToQuestion2">Suivant <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Question 2: What's your field? -->
+        <div class="question-section" id="question2">
+            <h2 class="question-title">Quel est votre domaine ?</h2>
+            <div class="options-container">
+                <button class="option-btn" data-value="engineering">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Ingénierie</span>
+                </button>
+                <button class="option-btn" data-value="science">
+                    <i class="bi bi-flask"></i>
+                    <span>Sciences</span>
+                </button>
+                <button class="option-btn" data-value="health">
+                    <i class="bi bi-heart-pulse"></i>
+                    <span>Santé</span>
+                </button>
+                <button class="option-btn" data-value="arts">
+                    <i class="bi bi-palette"></i>
+                    <span>Arts/Culture</span>
+                </button>
+                <button class="option-btn" data-value="literature">
+                    <i class="bi bi-book"></i>
+                    <span>Littérature</span>
+                </button>
+                <button class="option-btn" data-value="other">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Autre</span>
+                </button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-outline" id="backToQuestion1"><i class="bi bi-arrow-left"></i> Retour</button>
+                <button class="btn btn-primary" id="nextToQuestion3">Suivant <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Question 3: Education level -->
+        <div class="question-section" id="question3">
+            <h2 class="question-title">Quel est votre niveau d'études ?</h2>
+            <div class="options-container">
+                <button class="option-btn" data-value="bachelor">
+                    <i class="bi bi-mortarboard"></i>
+                    <span>Licence</span>
+                </button>
+                <button class="option-btn" data-value="master">
+                    <i class="bi bi-award"></i>
+                    <span>Master</span>
+                </button>
+                <button class="option-btn" data-value="phd">
+                    <i class="bi bi-stars"></i>
+                    <span>Doctorat</span>
+                </button>
+                <button class="option-btn" data-value="student">
+                    <i class="bi bi-journal-bookmark"></i>
+                    <span>Étudiant</span>
+                </button>
+                <button class="option-btn" data-value="professional">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Professionnel</span>
+                </button>
+                <button class="option-btn" data-value="other">
+                    <i class="bi bi-question-circle"></i>
+                    <span>Autre</span>
+                </button>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-outline" id="backToQuestion2"><i class="bi bi-arrow-left"></i> Retour</button>
+                <button class="btn btn-primary" id="nextToSignup">Suivant <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="signup-form" id="signupForm">
+            <h2 class="question-title">Create Your Account</h2>
+            <form method="POST" action="{{ url_for('signup') }}" id="registrationForm">
+                <input type="hidden" name="referral_source" id="referralSource">
+                <input type="hidden" name="field" id="userField">
+                <input type="hidden" name="education_level" id="educationLevel">
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" name="username" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" name="firstname" id="firstname" placeholder="First Name" required>
+                </div>
+                
+                <!-- Email Field 1 -->
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" id="email1" placeholder="Email Address" required>
+                </div>
+
+                <!-- Email Field 2 (Confirmation) -->
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email_confirm" id="email2" placeholder="Confirm Email Address" required>
+                    <div class="email-error-message" id="emailErrorMsg">
+                        <i class="bi bi-exclamation-circle"></i> Emails do not match
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                    <div class="validation-container" id="passwordValidation">
+                        <div class="validation-item" id="lengthCheck">
+                            <span class="validation-icon">○</span>
+                            <span>At least 8 characters</span>
+                        </div>
+                        <div class="validation-item" id="uppercaseCheck">
+                            <span class="validation-icon">○</span>
+                            <span>Uppercase letter (A-Z)</span>
+                        </div>
+                        <div class="validation-item" id="lowercaseCheck">
+                            <span class="validation-icon">○</span>
+                            <span>Lowercase letter (a-z)</span>
+                        </div>
+                        <div class="validation-item" id="numberCheck">
+                            <span class="validation-icon">○</span>
+                            <span>Number (0-9)</span>
+                        </div>
+                        <div class="validation-item" id="specialCheck">
+                            <span class="validation-icon">○</span>
+                            <span>Special character (!@#$%^&*)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-outline" id="backToQuestion3" type="button"><i class="bi bi-arrow-left"></i> Back</button>
+                    <button type="submit" class="btn btn-primary submit-btn" id="submitBtn" disabled>Create Account <i class="bi bi-check2"></i></button>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('login') }}" class="btn btn-outline">Already registered? Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const welcomeSection = document.getElementById('welcomeSection');
+        const question1 = document.getElementById('question1');
+        const question2 = document.getElementById('question2');
+        const question3 = document.getElementById('question3');
+        const signupForm = document.getElementById('signupForm');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Navigation Buttons
+        const startBtn = document.getElementById('startBtn');
+        const nextToQuestion2 = document.getElementById('nextToQuestion2');
+        const nextToQuestion3 = document.getElementById('nextToQuestion3');
+        const nextToSignup = document.getElementById('nextToSignup');
+        const backToWelcome1 = document.getElementById('backToWelcome1');
+        const backToQuestion1 = document.getElementById('backToQuestion1');
+        const backToQuestion2 = document.getElementById('backToQuestion2');
+        const backToQuestion3 = document.getElementById('backToQuestion3');
+        
+        // Form Inputs
+        const referralSource = document.getElementById('referralSource');
+        const userField = document.getElementById('userField');
+        const educationLevel = document.getElementById('educationLevel');
+        
+        // User Responses
+        const userResponses = {
+            referral: null,
+            field: null,
+            education: null
+        };
+        
+        // Option Selection
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove selected class from all buttons in this question
+                const parentContainer = this.closest('.options-container');
+                parentContainer.querySelectorAll('.option-btn').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked button
+                this.classList.add('selected');
+                
+                // Store the selected value
+                const questionId = this.closest('.question-section').id;
+                const value = this.getAttribute('data-value');
+                
+                if (questionId === 'question1') {
+                    userResponses.referral = value;
+                } else if (questionId === 'question2') {
+                    userResponses.field = value;
+                } else if (questionId === 'question3') {
+                    userResponses.education = value;
+                }
+            });
+        });
+        
+        // Navigation Functions
+        function showSection(sectionToShow) {
+            welcomeSection.style.display = 'none';
+            question1.style.display = 'none';
+            question2.style.display = 'none';
+            question3.style.display = 'none';
+            signupForm.style.display = 'none';
+            
+            sectionToShow.style.display = 'block';
+            
+            // Update progress bar
+            if (sectionToShow === welcomeSection) {
+                progressBar.style.width = '0%';
+            } else if (sectionToShow === question1) {
+                progressBar.style.width = '20%';
+            } else if (sectionToShow === question2) {
+                progressBar.style.width = '50%';
+            } else if (sectionToShow === question3) {
+                progressBar.style.width = '80%';
+            } else if (sectionToShow === signupForm) {
+                progressBar.style.width = '100%';
+                // Set hidden inputs with user responses
+                referralSource.value = userResponses.referral;
+                userField.value = userResponses.field;
+                educationLevel.value = userResponses.education;
+            }
+        }
+        
+        // Event Listeners
+        startBtn.addEventListener('click', () => showSection(question1));
+        
+        nextToQuestion2.addEventListener('click', () => {
+            if (userResponses.referral) {
+                showSection(question2);
+            } else {
+                alert('Veuillez sélectionner une option');
+            }
+        });
+        
+        nextToQuestion3.addEventListener('click', () => {
+            if (userResponses.field) {
+                showSection(question3);
+            } else {
+                alert('Veuillez sélectionner une option');
+            }
+        });
+        
+        nextToSignup.addEventListener('click', () => {
+            if (userResponses.education) {
+                showSection(signupForm);
+            } else {
+                alert('Veuillez sélectionner une option');
+            }
+        });
+        
+        backToWelcome1.addEventListener('click', () => showSection(welcomeSection));
+        backToQuestion1.addEventListener('click', () => showSection(question1));
+        backToQuestion2.addEventListener('click', () => showSection(question2));
+        backToQuestion3.addEventListener('click', () => showSection(question3));
+        
+        // Form Validation - Enhanced
+        const passwordInput = document.getElementById('password');
+        const email1Input = document.getElementById('email1');
+        const email2Input = document.getElementById('email2');
+        const usernameInput = document.getElementById('username');
+        const firstnameInput = document.getElementById('firstname');
+        const registrationForm = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const emailErrorMsg = document.getElementById('emailErrorMsg');
+
+        // Password validation checks
+        function validatePassword(password) {
+            return {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                lowercase: /[a-z]/.test(password),
+                number: /[0-9]/.test(password),
+                special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+        }
+
+        // Update password validation display
+        function updatePasswordValidation() {
+            const password = passwordInput.value;
+            const checks = validatePassword(password);
+
+            // Update validation items
+            document.getElementById('lengthCheck').classList.toggle('valid', checks.length);
+            document.getElementById('lengthCheck').classList.toggle('invalid', !checks.length && password.length > 0);
+            document.getElementById('uppercaseCheck').classList.toggle('valid', checks.uppercase);
+            document.getElementById('uppercaseCheck').classList.toggle('invalid', !checks.uppercase && password.length > 0);
+            document.getElementById('lowercaseCheck').classList.toggle('valid', checks.lowercase);
+            document.getElementById('lowercaseCheck').classList.toggle('invalid', !checks.lowercase && password.length > 0);
+            document.getElementById('numberCheck').classList.toggle('valid', checks.number);
+            document.getElementById('numberCheck').classList.toggle('invalid', !checks.number && password.length > 0);
+            document.getElementById('specialCheck').classList.toggle('valid', checks.special);
+            document.getElementById('specialCheck').classList.toggle('invalid', !checks.special && password.length > 0);
+
+            // Update icons
+            const items = ['lengthCheck', 'uppercaseCheck', 'lowercaseCheck', 'numberCheck', 'specialCheck'];
+            items.forEach(itemId => {
+                const item = document.getElementById(itemId);
+                const icon = item.querySelector('.validation-icon');
+                if (item.classList.contains('valid')) {
+                    icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                } else if (item.classList.contains('invalid')) {
+                    icon.innerHTML = '<i class="bi bi-x-circle-fill"></i>';
+                } else {
+                    icon.innerHTML = '○';
+                }
+            });
+
+            // Update password input border color
+            const isValid = checks.length && checks.uppercase && checks.lowercase && checks.number && checks.special;
+            if (password.length > 0) {
+                passwordInput.classList.toggle('valid', isValid);
+                passwordInput.classList.toggle('invalid', !isValid);
+            } else {
+                passwordInput.classList.remove('valid', 'invalid');
+            }
+
+            checkFormValidity();
+        }
+
+        // Check email match
+        function validateEmails() {
+            const email1 = email1Input.value;
+            const email2 = email2Input.value;
+
+            if (email2.length > 0) {
+                if (email1 === email2) {
+                    email1Input.classList.add('valid');
+                    email1Input.classList.remove('invalid');
+                    email2Input.classList.add('valid');
+                    email2Input.classList.remove('invalid');
+                    emailErrorMsg.style.display = 'none';
+                    return true;
+                } else {
+                    email1Input.classList.add('invalid');
+                    email1Input.classList.remove('valid');
+                    email2Input.classList.add('invalid');
+                    email2Input.classList.remove('valid');
+                    emailErrorMsg.style.display = 'block';
+                    return false;
+                }
+            } else if (email1.length > 0 && email2.length === 0) {
+                email1Input.classList.remove('valid', 'invalid');
+                email2Input.classList.remove('valid', 'invalid');
+                emailErrorMsg.style.display = 'none';
+                return false;
+            } else {
+                email1Input.classList.remove('valid', 'invalid');
+                email2Input.classList.remove('valid', 'invalid');
+                emailErrorMsg.style.display = 'none';
+                return false;
+            }
+        }
+
+        // Check overall form validity
+        function checkFormValidity() {
+            const password = passwordInput.value;
+            const checks = validatePassword(password);
+            const username = usernameInput.value.trim();
+            const firstname = firstnameInput.value.trim();
+            const email1 = email1Input.value.trim();
+            const email2 = email2Input.value.trim();
+
+            const passwordValid = checks.length && checks.uppercase && checks.lowercase && checks.number && checks.special;
+            const emailsValid = email1 === email2 && email1.length > 0 && email2.length > 0;
+            const fieldsValid = username.length > 0 && firstname.length > 0;
+
+            const isFormValid = passwordValid && emailsValid && fieldsValid;
+            submitBtn.disabled = !isFormValid;
+        }
+
+        // Event listeners for real-time validation
+        passwordInput.addEventListener('input', updatePasswordValidation);
+        email1Input.addEventListener('input', () => {
+            validateEmails();
+            checkFormValidity();
+        });
+        email2Input.addEventListener('input', () => {
+            validateEmails();
+            checkFormValidity();
+        });
+        usernameInput.addEventListener('input', checkFormValidity);
+        firstnameInput.addEventListener('input', checkFormValidity);
+
+        // Prevent copy-paste on email confirmation field
+        email2Input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            alert("❌ Pasting is not allowed. Please type the email manually for verification.");
+            return false;
+        });
+
+        email2Input.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Form submission
+        registrationForm.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            const email1 = email1Input.value;
+            const email2 = email2Input.value;
+            const checks = validatePassword(password);
+
+            // Prevent submission if validation fails
+            if (!checks.length || !checks.uppercase || !checks.lowercase || !checks.number || !checks.special) {
+                e.preventDefault();
+                alert("Password must contain:\n- 8 characters minimum\n- 1 uppercase letter\n- 1 lowercase letter\n- 1 number\n- 1 special character");
+                return;
+            }
+
+            if (email1 !== email2) {
+                e.preventDefault();
+                alert("Emails do not match. Please verify.");
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

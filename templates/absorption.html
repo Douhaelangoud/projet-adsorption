@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absorption Calculator - Assiyaton</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #f39c12;
+            --dark: #1a252f;
+            --light: #ecf0f1;
+            --success: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header Navigation */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .header-title i {
+            font-size: 32px;
+            color: var(--secondary);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .btn-logout {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        label i {
+            color: var(--secondary);
+            font-size: 16px;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+
+        .input-hint {
+            font-size: 11px;
+            color: #95a5a6;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 14px 35px;
+            font-size: 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-back {
+            background-color: #95a5a6;
+            color: white;
+            padding: 14px 35px;
+            font-size: 16px;
+            border-radius: 30px;
+        }
+
+        .btn-back:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-3px);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #ecf0f1;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .info-box i {
+            color: var(--secondary);
+            margin-right: 10px;
+        }
+
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .mode-option {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .mode-option input[type="radio"] {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--secondary);
+        }
+
+        .mode-option label {
+            margin-bottom: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* Conditional Fields */
+        .conditional-field {
+            display: none;
+        }
+
+        .conditional-field.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                padding: 25px;
+            }
+
+            .form-title {
+                font-size: 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Navigation -->
+        <div class="header">
+            <div class="header-title">
+                <i class="bi bi-droplet-fill"></i>
+                Absorption Calculator
+            </div>
+            <div class="header-nav">
+                <a href="/historique-absorption" class="btn btn-secondary">
+                    <i class="bi bi-clock-history"></i> History
+                </a>
+                <a href="/dashboard" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <form method="POST" action="/logout" style="display: inline;">
+                    <button type="submit" class="btn btn-logout" onclick="return confirm('Are you sure?')">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <h1 class="form-title">
+                <i class="bi bi-graph-up"></i> Absorption Calculation
+            </h1>
+            <p class="form-subtitle">Enter the parameters for your absorption calculation using McCabe-Thiele method</p>
+
+            <div class="info-box">
+                <i class="bi bi-info-circle"></i>
+                <strong>Info:</strong> This calculator uses the graphical McCabe-Thiele method to determine absorption stages based on liquid and gas flow rates.
+            </div>
+
+            <form method="POST" action="{{ url_for('resultat') }}" id="absorptionForm">
+                <input type="hidden" name="calculation_type" value="absorption">
+
+                <!-- Mode Selector -->
+                <div class="mode-selector">
+                    <div class="mode-option">
+                        <input type="radio" id="modeStages" name="absorption_mode" value="stages" checked>
+                        <label for="modeStages">
+                            <i class="bi bi-layers"></i> <strong>Known Stages</strong> - You know the number of stages
+                        </label>
+                    </div>
+                    <div class="mode-option">
+                        <input type="radio" id="modeTarget" name="absorption_mode" value="target">
+                        <label for="modeTarget">
+                            <i class="bi bi-target"></i> <strong>Target Concentration</strong> - Calculate stages to reach target
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Base Parameters -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="L">
+                            <i class="bi bi-droplet"></i> Liquid Flow Rate (L)
+                        </label>
+                        <input type="number" 
+                               id="L" 
+                               name="L" 
+                               placeholder="200" 
+                               value="200" 
+                               step="0.1" 
+                               min="1" 
+                               required>
+                        <div class="input-hint">Liquid flow rate (units)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="G">
+                            <i class="bi bi-wind"></i> Gas Flow Rate (G)
+                        </label>
+                        <input type="number" 
+                               id="G" 
+                               name="G" 
+                               placeholder="150" 
+                               value="150" 
+                               step="0.1" 
+                               min="1" 
+                               required>
+                        <div class="input-hint">Gas flow rate (units)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="yo">
+                            <i class="bi bi-percent"></i> Initial Gas Concentration (yo)
+                        </label>
+                        <input type="number" 
+                               id="yo" 
+                               name="yo" 
+                               placeholder="0.06" 
+                               value="0.06" 
+                               step="0.001" 
+                               min="0.001" 
+                               max="1" 
+                               required>
+                        <div class="input-hint">Initial concentration (0-1)</div>
+                    </div>
+                </div>
+
+                <!-- Conditional Field: Number of Stages -->
+                <div id="stagesField" class="form-grid conditional-field active">
+                    <div class="form-group">
+                        <label for="num_stages">
+                            <i class="bi bi-layers"></i> Number of Stages
+                        </label>
+                        <input type="number" 
+                               id="num_stages" 
+                               name="num_stages" 
+                               placeholder="5" 
+                               value="5" 
+                               step="1" 
+                               min="1" 
+                               max="20">
+                        <div class="input-hint">Stages to calculate (1-20)</div>
+                    </div>
+                </div>
+
+                <!-- Conditional Field: Target Concentration -->
+                <div id="targetField" class="form-grid conditional-field">
+                    <div class="form-group">
+                        <label for="y_target">
+                            <i class="bi bi-bullseye"></i> Target Gas Concentration (Y target)
+                        </label>
+                        <input type="number" 
+                               id="y_target" 
+                               name="y_target" 
+                               placeholder="0.01" 
+                               value="0.01" 
+                               step="0.001" 
+                               min="0.001" 
+                               max="1">
+                        <div class="input-hint">Target final concentration (less than initial)</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <a href="/dashboard" class="btn btn-back">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-calculator"></i> Calculate Absorption
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle between modes
+        function toggleAbsorptionMode() {
+            const modeStages = document.getElementById('modeStages');
+            const stagesField = document.getElementById('stagesField');
+            const targetField = document.getElementById('targetField');
+            
+            if (modeStages.checked) {
+                stagesField.classList.add('active');
+                targetField.classList.remove('active');
+                document.getElementById('num_stages').required = true;
+                document.getElementById('y_target').required = false;
+            } else {
+                stagesField.classList.remove('active');
+                targetField.classList.add('active');
+                document.getElementById('num_stages').required = false;
+                document.getElementById('y_target').required = true;
+            }
+        }
+        
+        // Add event listeners for mode selection
+        document.getElementById('modeStages').addEventListener('change', toggleAbsorptionMode);
+        document.getElementById('modeTarget').addEventListener('change', toggleAbsorptionMode);
+        
+        // Form validation
+        document.getElementById('absorptionForm').addEventListener('submit', function(e) {
+            const mode = document.querySelector('input[name="absorption_mode"]:checked').value;
+            const L = parseFloat(document.getElementById('L').value);
+            const G = parseFloat(document.getElementById('G').value);
+            const yo = parseFloat(document.getElementById('yo').value);
+            
+            if (isNaN(L) || L <= 0 || isNaN(G) || G <= 0 || isNaN(yo) || yo <= 0 || yo >= 1) {
+                e.preventDefault();
+                alert('Please enter valid flow rates and initial concentration (0 < yo < 1)');
+                return;
+            }
+            
+            if (mode === 'stages') {
+                const num_stages = parseInt(document.getElementById('num_stages').value);
+                if (isNaN(num_stages) || num_stages < 1 || num_stages > 20) {
+                    e.preventDefault();
+                    alert('Please enter a valid number of stages (1-20)');
+                    return;
+                }
+            } else {
+                const y_target = parseFloat(document.getElementById('y_target').value);
+                if (isNaN(y_target) || y_target <= 0 || y_target >= yo) {
+                    e.preventDefault();
+                    alert('Please enter a valid target concentration (must be > 0 and < initial concentration)');
+                    return;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

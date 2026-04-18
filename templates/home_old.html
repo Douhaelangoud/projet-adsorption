@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assiyaton</title>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #1abc9c;
+            --dark: #1a252f;
+            --light: #ecf0f1;
+            --danger: #e74c3c;
+            --header-height: 70px;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: #333;
+            transition: all 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #f5f5f5;
+            --light: #1e1e1e;
+            --primary: #0d47a1;
+            --secondary: #00bcd4;
+        }
+
+        /* Scientific Background Pattern - Professionnel */
+        .scientific-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(135deg, rgba(26, 188, 156, 0.03) 0%, transparent 20%),
+                linear-gradient(225deg, rgba(52, 152, 219, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 75% 25%, rgba(231, 76, 60, 0.02) 0%, transparent 30%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="none" stroke="%231abc9c" stroke-width="0.5" opacity="0.1" d="M0,0 L100,100 M100,0 L0,100 M50,0 L50,100 M0,50 L100,50"/></svg>');
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .dark-mode .scientific-bg {
+            background: 
+                linear-gradient(135deg, rgba(0, 188, 212, 0.03) 0%, transparent 20%),
+                linear-gradient(225deg, rgba(25, 118, 210, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 75% 25%, rgba(255, 152, 0, 0.02) 0%, transparent 30%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="none" stroke="%2300bcd4" stroke-width="0.5" opacity="0.1" d="M0,0 L100,100 M100,0 L0,100 M50,0 L50,100 M0,50 L100,50"/></svg>');
+        }
+
+        /* Molecule Animation */
+        .molecule {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 15s infinite linear;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(50vw, 30vh) rotate(90deg);
+            }
+            50% {
+                transform: translate(80vw, 10vh) rotate(180deg);
+            }
+            75% {
+                transform: translate(30vw, 60vh) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: white;
+            height: var(--header-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s ease;
+        }
+
+        .dark-mode header {
+            box-shadow: 0 2px 15px rgba(0,0,0,0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(15deg);
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: -300px;
+            width: 300px;
+            height: calc(100vh - var(--header-height));
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 1.5rem;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 999;
+            overflow-y: auto;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .sidebar-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-links a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .sidebar-links a:hover::before {
+            left: 100%;
+        }
+
+        .sidebar-links a:hover {
+            background-color: rgba(255,255,255,0.05);
+            transform: translateX(5px);
+        }
+
+        .sidebar-links i {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            min-width: 25px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: var(--header-height);
+            padding: 3rem;
+            transition: all 0.4s ease;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .main-content.shifted {
+            margin-left: 300px;
+        }
+
+        .hero-section {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 3rem 2rem;
+            background-color: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .dark-mode .hero-section {
+            background-color: rgba(30,30,30,0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+            opacity: 0.05;
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--secondary);
+            border-radius: 3px;
+        }
+
+        .dark-mode .hero-title {
+            color: var(--secondary);
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            text-align: justify;
+            hyphens: auto;
+            padding: 0 1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: white;
+            box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4);
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover .btn-icon {
+            transform: scale(1.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            transform: translateY(-50px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: var(--secondary);
+        }
+
+        .dark-mode .modal-content {
+            background-color: #1e1e1e;
+            color: white;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .modal-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+
+        .dark-mode .modal-title {
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content.shifted {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 250px;
+                left: -250px;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo span {
+                display: none;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Scientific Background -->
+    <div class="scientific-bg"></div>
+
+    <!-- Molecule Animations -->
+    <div class="molecule" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="molecule" style="top: 70%; left: 80%; animation-delay: 2s; width: 6px; height: 6px;"></div>
+    <div class="molecule" style="top: 40%; left: 60%; animation-delay: 4s; width: 10px; height: 10px;"></div>
+    <div class="molecule" style="top: 80%; left: 30%; animation-delay: 6s; width: 5px; height: 5px;"></div>
+    <div class="molecule" style="top: 30%; left: 50%; animation-delay: 8s;"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="bi bi-atom logo-icon"></i>
+            <span>Assiyaton</span>
+        </div>
+        
+        <nav>
+            <a href="/login" class="nav-link">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+            <a href="/signup" class="nav-link">
+                <i class="bi bi-person-plus"></i> Sign Up
+            </a>
+            <button id="darkModeToggle" class="nav-link" style="background: none; border: none; cursor: pointer;">
+                <i class="bi bi-moon"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="bi bi-robot sidebar-icon"></i>
+            <h3 class="sidebar-title">Navigation</h3>
+        </div>
+        
+        <ul class="sidebar-links">
+            <li>
+                <a href="#" id="aboutLink">
+                    <i class="bi bi-info-circle"></i> About Us
+                </a>
+            </li>
+            <li>
+                <a href="#" id="contactLink">
+                    <i class="bi bi-envelope"></i> Contact
+                </a>
+            </li>
+            <li>
+                <a href="https://linkedin.com/in/elkhayati-assiya" target="_blank">
+                    <i class="bi bi-linkedin"></i> LinkedIn
+                </a>
+            </li>
+            <li>
+                <a href="https://github.com/asiya-elkhayati" target="_blank">
+                    <i class="bi bi-github"></i> GitHub
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="hero-section">
+            <div style="margin-bottom: 2rem;">
+                <i class="bi bi-atom" style="font-size: 3rem; color: var(--secondary); animation: pulse 2s infinite;"></i>
+            </div>
+            
+            <h1 class="hero-title">Assiyaton</h1>
+            
+            <p class="hero-description">
+                This advanced web application is designed for chemical and process engineers to accurately calculate 
+                absorption and desorption parameters in separation processes. As a chemical engineering student specializing 
+                in process engineering, I developed this tool to bridge the gap between theoretical mass transfer principles 
+                and practical industrial applications.
+                <br><br>
+                The absorption and desorption calculator is particularly valuable for designing and optimizing 
+                separation equipment including packed columns, bubble reactors, and staged absorbers. This tool calculates 
+                critical parameters such as the desorption factor (S) and overall separation efficiency, accounting for 
+                gas-liquid contact patterns and mass transfer rates.
+                <br><br>
+                Built with Python's Flask framework for the backend, SQLAlchemy for database management, and NumPy 
+                for complex scientific computations, this application combines robust engineering with elegant 
+                software design. The system incorporates Werkzeug for secure password hashing, Flask-Mail for 
+                account verification, and Matplotlib for advanced visualization of separation profiles.
+                <br><br>
+                Whether you're working on gas purification, volatile organic compound (VOC) recovery, or liquid-liquid 
+                extraction design, this tool provides reliable data to support your engineering decisions and 
+                optimize your separation processes.
+            </p>
+            
+            <button class="btn btn-primary" id="calculatorBtn">
+                <i class="bi bi-calculator btn-icon"></i> Open Calculator
+            </button>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <h3 class="modal-title">About Me</h3>
+            <div class="modal-body">
+                <p>
+                    I'm Assiya El Khayati, a passionate chemical and process engineering student with a strong 
+                    interest in mass transfer operations and process simulation. This project combines my 
+                    engineering knowledge with software development skills to create practical tools for 
+                    chemical engineers.
+                </p>
+                <p>
+                    The Assiyaton Absorption & Desorption Calculator represents my commitment to bridging the gap between 
+                    theoretical chemical engineering concepts and practical industrial applications. My goal 
+                    is to develop software solutions that make complex engineering calculations more accessible 
+                    and user-friendly for professionals working in separation processes.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeAboutModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Contact Me</h3>
+            <div class="modal-body">
+                <p>
+                    <i class="bi bi-envelope"></i> Email: 
+                    <a href="mailto:assiya.elkhayati.2004@gmail.com" style="color: var(--secondary); text-decoration: none;">
+                        assiya.elkhayati.2004@gmail.com
+                    </a>
+                </p>
+                <p>
+                    Feel free to reach out for collaborations, questions about this project, or any 
+                    professional inquiries. I'm particularly interested in opportunities related to 
+                    process engineering, computational chemistry, and software development for 
+                    engineering applications.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeContactModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div class="modal" id="calculatorModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Access Calculator</h3>
+            <div class="modal-body">
+                To use the Absorption & Desorption Calculator, please create an account or log in if you 
+                already have one. This ensures your calculations are saved and you can access them anytime.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeCalcModal">Later</button>
+                <a href="/signup" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Sign Up
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const menuBtn = document.querySelector('header .logo');
+        
+        // Modal Elements
+        const aboutLink = document.getElementById('aboutLink');
+        const contactLink = document.getElementById('contactLink');
+        const calculatorBtn = document.getElementById('calculatorBtn');
+        const aboutModal = document.getElementById('aboutModal');
+        const contactModal = document.getElementById('contactModal');
+        const calculatorModal = document.getElementById('calculatorModal');
+        const closeAboutModal = document.getElementById('closeAboutModal');
+        const closeContactModal = document.getElementById('closeContactModal');
+        const closeCalcModal = document.getElementById('closeCalcModal');
+
+        // Create additional molecules
+        function createMolecules() {
+            const bg = document.querySelector('.scientific-bg');
+            for (let i = 0; i < 8; i++) {
+                const molecule = document.createElement('div');
+                molecule.className = 'molecule';
+                molecule.style.top = Math.random() * 100 + '%';
+                molecule.style.left = Math.random() * 100 + '%';
+                molecule.style.width = (Math.random() * 8 + 4) + 'px';
+                molecule.style.height = molecule.style.width;
+                molecule.style.animationDelay = (Math.random() * 10) + 's';
+                molecule.style.animationDuration = (Math.random() * 20 + 10) + 's';
+                bg.appendChild(molecule);
+            }
+        }
+
+        // Dark Mode Toggle
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.replace('bi-moon', 'bi-sun');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                icon.classList.replace('bi-sun', 'bi-moon');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.querySelector('i').classList.replace('bi-moon', 'bi-sun');
+        }
+
+        // Sidebar Toggle
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            mainContent.classList.toggle('shifted');
+        });
+
+        // Modal Controls
+        aboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            aboutModal.style.display = 'flex';
+            setTimeout(() => aboutModal.classList.add('show'), 10);
+        });
+
+        contactLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            contactModal.style.display = 'flex';
+            setTimeout(() => contactModal.classList.add('show'), 10);
+        });
+
+        calculatorBtn.addEventListener('click', () => {
+            calculatorModal.style.display = 'flex';
+            setTimeout(() => calculatorModal.classList.add('show'), 10);
+        });
+
+        // Close Modal Functions
+        function closeModal(modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        closeAboutModal.addEventListener('click', () => closeModal(aboutModal));
+        closeContactModal.addEventListener('click', () => closeModal(contactModal));
+        closeCalcModal.addEventListener('click', () => closeModal(calculatorModal));
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === aboutModal) closeModal(aboutModal);
+            if (e.target === contactModal) closeModal(contactModal);
+            if (e.target === calculatorModal) closeModal(calculatorModal);
+        });
+
+        // Create molecules on load
+        window.addEventListener('load', createMolecules);
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UNIFAC Calculator</title>
+</head>
+<body>
+    <h2>UNIFAC Diffusion Coefficient Calculator</h2>
+    <form action="/calculate" method="POST">
+        <label>Component 1:</label><br>
+        <input type="text" name="component1" required><br><br>
+
+        <label>Component 2:</label><br>
+        <input type="text" name="component2" required><br><br>
+
+        <label>Temperature (K):</label><br>
+        <input type="number" name="temperature" required><br><br>
+
+        <label>Pressure (atm):</label><br>
+        <input type="number" name="pressure" required><br><br>
+
+        <button type="submit">Calculate</button>
+    </form>
+</body>
+</html>
