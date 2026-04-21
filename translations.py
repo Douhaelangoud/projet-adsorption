@@ -16,6 +16,8 @@ TRANSLATIONS = {
         'signup': 'Inscription',
         'back': 'Retour',
         'home': 'Accueil',
+        'deactivate_account': 'Désactiver mon compte',
+        'confirm_deactivate': 'Êtes-vous sûr de vouloir désactiver votre compte ?',
         
         # Forms
         'calculate': 'Calculer',
@@ -231,6 +233,8 @@ TRANSLATIONS = {
         'filter_by_period': 'Filter by Period',
         'users_joined': 'Users Joined',
         'already_have_account': 'Already have an account?',
+        'deactivate_account': 'Deactivate my account',
+        'confirm_deactivate': 'Are you sure you want to deactivate your account?',
     },
     'es': {
         # App name and general
@@ -347,6 +351,8 @@ TRANSLATIONS = {
         'filter_by_period': 'Filtrar por Período',
         'users_joined': 'Usuarios Registrados',
         'already_have_account': '¿Ya tienes una cuenta?',
+        'deactivate_account': 'Desactivar mi cuenta',
+        'confirm_deactivate': '¿Está seguro de que quiere desactivar su cuenta?',
     }
 }
 

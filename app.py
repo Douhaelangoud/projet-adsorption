@@ -79,16 +79,17 @@ def get_text_by_key(key):
 # Context processor to pass language-related data to templates
 @app.context_processor
 def inject_language():
+    lang = session.get('lang', 'fr')
     return {
-        'current_language': get_current_language(),
+        'current_language': lang,
         'supported_languages': [
             {'code': 'en', 'name': 'English', 'flag': '🇬🇧'},
             {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
             {'code': 'es', 'name': 'Español', 'flag': '🇪🇸'},
         ],
-        'gettext': get_text_by_key,
-        'app_name': get_text('app_name', get_current_language()),
-        'app_description': get_text('app_description', get_current_language()),
+        'gettext': lambda key: get_text(key, lang),
+        'app_name': get_text('app_name', lang),
+        'app_description': get_text('app_description', lang),
     }
 
 # -------------------- MODELE UTILISATEUR -------------------- #
@@ -99,10 +100,15 @@ class User(db.Model):
     firstname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    is_active = db.Column(db.Boolean, default=False)
     activation_token = db.Column(db.String(500), unique=True, nullable=True)
     failed_login_attempts = db.Column(db.Integer, default=0)
     last_failed_login = db.Column(db.Float, default=0)
+    ip_address = db.Column(db.String(50), nullable=True)
+    mac_address = db.Column(db.String(255), nullable=True)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_banned = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True) 
+
     # New fields for dashboard and analytics
     domain = db.Column(db.String(50), nullable=True)  # Google, Facebook, WhatsApp, LinkedIn, GitHub, Other
     how_found_app = db.Column(db.String(100), nullable=True)  # How they discovered the app
@@ -451,13 +457,15 @@ def calcul_etages_absorption_necessaires(L, G, yo, y_target):
 # Language switcher route
 @app.route('/set-language/<language>')
 def set_language(language):
+    codes = ['en', 'fr', 'es']  # ✅ liste simple
     if language in SUPPORTED_LANGUAGES:
-        session['language'] = language
+        session['lang'] = language
         flash(f'Language changed to {language.upper()}', 'info')
     return redirect(request.referrer or url_for('home'))
 
 @app.route('/')
 def home():
+    lang = session.get('lang', 'fr')
     return render_template('home.html')
 
 @app.route('/dashboard')
@@ -467,6 +475,8 @@ def dashboard():
         flash('Please log in to access the dashboard', 'error')
         return redirect(url_for('login'))
     
+    lang = session.get('lang', 'fr')
+
     # Get statistics
     total_users = User.query.count()
     
@@ -478,6 +488,7 @@ def dashboard():
     found_by = db.session.query(User.how_found_app, db.func.count(User.id)).group_by(User.how_found_app).all()
     found_by_stats = {source[0] or 'Direct': source[1] for source in found_by}
     
+
     # Calculate weekly and monthly stats
     from datetime import datetime, timedelta
     now = datetime.now()
@@ -492,13 +503,36 @@ def dashboard():
                          domain_stats=domain_stats,
                          found_by_stats=found_by_stats,
                          weekly_users=weekly_users,
-                         monthly_users=monthly_users)
+                         monthly_users=monthly_users,
+                         lang=lang,
+                         get_text=get_text)
+                         
+
+@app.route('/deactivate_account')
+def deactivate_account():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+    user.is_active = False
+    db.session.commit()
+
+    lang = session.get('lang', 'fr')  # 👈 save language
+
+    session.clear()  # logout automatique
+
+    session['lang'] = lang  # 👈 restore language
+
+    flash('Your account has been deactivated', 'info')
+    return redirect(url_for('login'))
 
 @app.route('/api/dashboard-stats')
 def api_dashboard_stats():
     """API endpoint for dashboard statistics"""
     if not session.get('user_id'):
         return jsonify({'error': 'Unauthorized'}), 401
+    
+    lang = session.get('lang', 'fr')  # 👈 ICI tu ajoutes
     
     # Get statistics
     domains = db.session.query(User.domain, db.func.count(User.id)).group_by(User.domain).all()
@@ -510,17 +544,21 @@ def api_dashboard_stats():
     return jsonify({
         'domains': domain_stats,
         'found_by': found_by_stats,
-        'total_users': User.query.count()
+        'total_users': User.query.count(),
+        'lang': session.get('lang', 'fr')  # 👈 ICI tu ajoutes
     })
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    lang = session.get('lang', 'fr')   # 👈 AJOUT 1 (LANGUE)
+
     if request.method == 'POST':
         username = request.form.get('username')
         firstname = request.form.get('firstname')
         email = request.form.get('email')
         email_confirm = request.form.get('email_confirm')
         password = request.form.get('password')
+        ip_address = request.remote_addr
 
         # Validate that both emails exist and match
         if not email or not email_confirm:
@@ -549,6 +587,7 @@ def signup():
 
         # Generate activation token
         activation_token = s.dumps(email, salt='email-activation')
+        activation_link = url_for('activate_account', token=activation_token, _external=True)
         
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(
@@ -559,7 +598,9 @@ def signup():
             is_active=False,
             activation_token=activation_token,
             domain=request.form.get('domain', 'Other'),
-            how_found_app=request.form.get('how_found_app', 'Direct')
+            how_found_app=request.form.get('how_found_app', 'Direct'),
+            ip_address=request.remote_addr,
+            mac_address=request.headers.get('User-Agent')
         )
         db.session.add(new_user)
         db.session.commit()
@@ -716,6 +757,7 @@ def signup():
             </html>
             """
             
+            msg.body = f"Click here to activate your account: {activation_link}"
             mail.send(msg)
             flash("Account created! Please check your email to activate your account.", 'success')
         except Exception as e:
@@ -723,10 +765,12 @@ def signup():
             flash("Account created but email sending failed. Please contact support.", 'warning')
         
         return redirect(url_for('login'))
-    return render_template('signup.html')
-
+    return render_template('signup.html', lang=lang, get_text=get_text)
+     
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    lang = session.get('lang', 'fr')  # 👈 AJOUT
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -771,10 +815,12 @@ def login():
         else:
             flash("Incorrect email or password.")
             return redirect(url_for('login'))
-    return render_template('login.html')
+    return render_template('login.html', lang=lang, get_text=get_text)
 
 @app.route('/activate/<token>', methods=['GET'])
 def activate_account(token):
+    lang = session.get('lang', 'fr')  # 👈 AJOUT
+
     try:
         email = s.loads(token, salt='email-activation', max_age=86400)  # 24 hours
     except SignatureExpired:
@@ -801,6 +847,8 @@ def activate_account(token):
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
+    lang = session.get('lang', 'fr')
+
     if request.method == 'POST':
         email = request.form.get('email')
         user = User.query.filter_by(email=email).first()
@@ -825,10 +873,12 @@ Si vous n'avez pas demandé de réinitialisation, ignorez simplement cet email.
         else:
             flash("Cet email n'est associé à aucun compte.", 'error')
         return redirect(url_for('forgot_password'))
-    return render_template('forgot_password.html')
+    return render_template('forgot_password.html', lang=lang, get_text=get_text)
 
 @app.route('/reset/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+    lang = session.get('lang', 'fr')
+
     try:
         email = s.loads(token, salt='email-reset', max_age=600)
     except SignatureExpired:
@@ -858,23 +908,26 @@ def reset_password(token):
             else:
                 flash("Utilisateur non trouvé.", 'error')
     
-    return render_template('reset.html')
+    return render_template('reset.html', lang=lang, get_text=get_text)
 
 @app.route('/formulaire', methods=['GET'])
 def formulaire():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('formulaire.html')
+    lang = session.get('language', 'fr')
+    return render_template('formulaire.html', lang=lang, get_text=get_text)
 
 @app.route('/absorption', methods=['GET'])
 def absorption():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('absorption.html')
+    lang = session.get('language', 'fr')
+    return render_template('absorption.html', lang=lang, get_text=get_text)
 
 @app.route('/resultat', methods=['POST'])
 def resultat():
     try:
+        lang = session.get('lang', 'fr')
         calculation_type = request.form.get('calculation_type', 'desorption')
         
         # Sauvegarder les paramètres d'entrée originaux
@@ -1045,7 +1098,7 @@ def resultat():
                 app.logger.error(f"Traceback: {e}", exc_info=True)
                 resultats['saved'] = False
         
-        return render_template('resultat.html', resultats=resultats)
+        return render_template('resultat.html', resultats=resultats, lang=lang)
 
     except ValueError as e:
         flash(f"Error: Check your parameters (invalid numbers)")
@@ -1589,6 +1642,197 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+@app.route('/admin')
+def admin_panel():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+
+    if not user or not user.is_admin:
+        return "Access denied"
+
+    users = User.query.all()
+
+    # 🔥 CORRECTION LOGIQUE
+    active_users = User.query.filter(
+        User.is_active == True,
+        User.is_banned == False
+    ).count()
+
+    inactive_users = User.query.filter(
+        User.is_active == False,
+        User.is_banned == False
+    ).count()
+
+    banned_users = User.query.filter(
+        User.is_banned == True
+    ).count()
+
+    return render_template(
+        'admin.html',
+        users=users,
+        active_users=active_users,
+        inactive_users=inactive_users,
+        banned_users=banned_users
+    )
+
+@app.route('/send_status_mail/<int:id>')
+def send_status_mail(id):
+    user = User.query.get(id)
+
+    if user.is_admin:
+        subject = "Account Status Update - Admin Access Granted"
+        body = f"""
+Dear {user.firstname},
+
+We are pleased to inform you that your account has been updated.
+
+✔ Status: ADMIN ACCESS GRANTED
+✔ You now have full administrative privileges.
+
+You can now access all administrative features of the platform.
+
+Best regards,  
+Administration Team
+"""
+
+    elif user.is_banned:
+        subject = "Account Status Update - Account Suspended"
+        body = f"""
+Dear {user.firstname},
+
+We regret to inform you that your account has been suspended.
+
+❌ Status: BANNED
+❌ Access to the platform has been restricted.
+
+If you believe this is a mistake, please contact support.
+
+Best regards,  
+Support Team
+"""
+
+    elif user.is_active:
+        subject = "Account Status Update - Activation Successful"
+        body = f"""
+Dear {user.firstname},
+
+We are pleased to inform you that your account has been successfully activated.
+
+🎉 Status: ACTIVE
+✔ You now have full access to the platform.
+
+Thank you for joining us.
+
+Best regards,  
+Support Team
+"""
+
+    else:
+        subject = "Account Status Update - Pending Activation"
+        body = f"""
+Dear {user.firstname},
+
+Your account is currently under review or inactive.
+
+⏳ Status: INACTIVE
+Please complete any required steps to activate your account.
+
+We appreciate your patience.
+
+Best regards,  
+Support Team
+"""
+
+    msg = Message(
+        subject=subject,
+        sender=app.config['MAIL_DEFAULT_SENDER'],
+        recipients=[user.email],
+        body=body
+    )
+
+    mail.send(msg)
+
+    return redirect('/admin')
+
+@app.route('/activate_user/<int:id>')
+def activate_user(id):
+    user = User.query.get(id)
+    user.is_active = True
+    user.is_banned = False
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/deactivate_user/<int:id>')
+def deactivate_user(id):
+    user = User.query.get(id)
+    user.is_active = False
+    user.is_banned = False
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/ban_user/<int:id>')
+def ban_user(id):
+    user = User.query.get(id)
+    user.is_banned = True
+    user.is_active = False
+    db.session.commit()
+    return redirect('/admin')
+
+
+@app.route('/make_admin/<int:id>')
+def make_admin(id):
+    user = User.query.get(id)
+    user.is_admin = True
+    db.session.commit()
+    return redirect('/admin')
+
+@app.route('/edit_user/<int:id>', methods=['GET', 'POST'])
+def edit_user(id):
+    user = User.query.get(id)
+
+    if request.method == 'POST':
+        user.username = request.form['username']
+        user.email = request.form['email']
+        user.first_name = request.form['first_name']
+        user.last_name = request.form['last_name']
+
+        db.session.commit()
+        return redirect('/admin')
+
+    return render_template('edit_user.html', user=user)
+
+@app.route('/fix_users')
+def fix_users():
+    users = User.query.all()
+    for u in users:
+        if u.is_banned is None:
+            u.is_banned = False
+    db.session.commit()
+    return "Users fixed"
+
+@app.route('/reset_users_logic')
+def reset_users_logic():
+    users = User.query.all()
+
+    for u in users:
+        # règle propre métier
+        if u.is_banned:
+            u.is_active = False
+        else:
+            # si pas banni → garder actif ou non selon ton choix
+            if u.is_active is None:
+                u.is_active = False
+
+        if u.is_banned is None:
+            u.is_banned = False
+
+    db.session.commit()
+    return "Database logic fixed"
+
 if __name__ == '__main__':
     # Test SMTP au démarrage
     try:
@@ -1614,6 +1858,14 @@ if __name__ == '__main__':
     print(f"✅ Accès local : http://localhost:{SERVER_PORT}")
     print(f"✅ Accessible depuis d'autres appareils sur le même réseau")
     print("="*60 + "\n")
+    
+    # 🔥 AJOUT ADMIN ICI
+    with app.app_context():
+        user = User.query.first()
+        if user:
+            user.is_admin = True
+            db.session.commit()
+
     
     # Run Flask server on 0.0.0.0 to be accessible from other devices
     app.run(host='0.0.0.0', port=SERVER_PORT, debug=True)

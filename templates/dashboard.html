@@ -95,20 +95,31 @@
         </table>
     </div>
 
-    <!-- Action Buttons -->
-    <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
-        <a href="{{ url_for('absorption') }}" class="btn btn-primary">
-            <i class="bi bi-droplet"></i> {{ gettext('absorption') }}
-        </a>
-        <a href="{{ url_for('formulaire') }}" class="btn btn-primary">
-            <i class="bi bi-cloud-upload"></i> {{ gettext('desorption') }}
-        </a>
-        <a href="{{ url_for('historique_absorption') }}" class="btn btn-secondary">
-            <i class="bi bi-clock-history"></i> {{ gettext('history') }}
-        </a>
-    </div>
-</div>
+   <!-- Action Buttons -->
+<div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+    <a href="{{ url_for('absorption') }}" class="btn btn-primary">
+        <i class="bi bi-droplet"></i> {{ gettext('absorption') }}
+    </a>
 
+    <a href="{{ url_for('formulaire') }}" class="btn btn-primary">
+        <i class="bi bi-cloud-upload"></i> {{ gettext('desorption') }}
+    </a>
+
+    <a href="{{ url_for('historique_absorption') }}" class="btn btn-secondary">
+        <i class="bi bi-clock-history"></i> {{ gettext('history') }}
+    </a>
+   <!-- 🔥 BOUTON ADMIN -->
+    <a href="/admin" class="btn btn-dark">
+        Admin Panel
+    </a>
+
+  <!-- 🔴 AJOUT DÉSACTIVATION COMPTE -->
+   <a href="{{ url_for('deactivate_account') }}" 
+   class="btn btn-outline-danger btn-sm"
+   style="border: 2px solid #35dc96; border-radius: 25px; padding: 6px 15px; font-weight: 500; transition: 0.3s;"
+   onclick="return confirm('{{ gettext("confirm_deactivate") }}');">
+    {{ gettext('deactivate_account') }}
+</a>
 <script>
     // Chart.js color palette
     const colors = {
