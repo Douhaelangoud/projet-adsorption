@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f7f5;
+        }
+
+        .card {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h3>Résultats</h3>
+
+        <ul>
+            <li><strong>Facteur d’absorption A :</strong> {{ A }}</li>
+            <li><strong>Nombre d’étages (Kremser) :</strong> {{ N_kremser }}</li>
+            <li><strong>Nombre d’étages (Graphique) :</strong> {{ N_graph }}</li>
+            <li><strong>Taux d’absorption :</strong> {{ tau }}</li>
+            <li><strong>Quantité absorbée :</strong> {{ n_abs }}</li>
+        </ul>
+
+        <hr>
+
+        <h4 class="text-center">Diagramme McCabe-Thiele</h4>
+
+        <div class="text-center">
+            <img src="data:image/png;base64,{{ graph }}" class="img-fluid"/>
+        </div>
+
+        <hr>
+
+        <p><strong>Temps d'exécution :</strong> {{ exec_time }} s</p>
+        <p><strong>Mémoire utilisée :</strong> {{ mem_used }} Mo</p>
+
+        <a href="/" class="btn btn-secondary mt-3">
+            Retour
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
