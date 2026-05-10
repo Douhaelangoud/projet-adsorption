@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contributors - GitHub Profiles - {{ app_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(-45deg, #1abc9c, #2c3e50, #e74c3c, #3498db);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .contributors-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 50px auto;
+            max-width: 800px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .contributor-card {
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.1), rgba(44, 62, 80, 0.1));
+            border: 1px solid rgba(26, 188, 156, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .contributor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.3);
+            border-color: #1abc9c;
+        }
+
+        .contributor-thumb {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            float: left;
+            margin-right: 20px;
+            border: 3px solid rgba(255,255,255,0.8);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .contributor-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .role-text {
+            color: #1abc9c;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .github-link {
+            color: #24292e;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .github-link:hover {
+            color: #0366d6;
+            text-decoration: underline;
+        }
+
+        .back-btn {
+            background: #1abc9c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #16a085;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
+            color: white;
+        }
+
+        .title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #1abc9c;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .platform-badge {
+            display: inline-block;
+            background: #24292e;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="contributors-container">
+            <h1 class="title">Our Contributors</h1>
+            <p class="subtitle">GitHub Profiles</p>
+            <div class="platform-badge">
+                <i class="bi bi-github"></i> GitHub
+            </div>
+            <p class="help-text" style="margin-bottom: 25px; color: #2c3e50; text-align: center;">
+                Cliquez sur un profil pour voir les détails dans l'application.
+            </p>
+
+            {% for contributor in contributors %}
+            <div class="contributor-card">
+                <img src="{{ url_for('static', filename='contributors/' ~ contributor.photo) }}" alt="{{ contributor.name }}" class="contributor-thumb" onerror="this.onerror=null; this.src='https://via.placeholder.com/70?text=Photo'" />
+                <h3 class="contributor-name">{{ contributor.name }}</h3>
+                <p class="role-text">{{ contributor.role }}</p>
+                <p class="help-text" style="margin-top:10px; clear: both;">
+                    <a href="{{ url_for('contributor_github_profile', slug=contributor.slug) }}" class="github-link">
+                        <i class="bi bi-github"></i> Voir le profil GitHub
+                    </a>
+                </p>
+            </div>
+            {% endfor %}
+
+            <div class="text-center">
+                <a href="{{ url_for('home') }}" class="back-btn">
+                    <i class="bi bi-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

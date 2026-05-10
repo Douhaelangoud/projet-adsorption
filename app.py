@@ -1,7 +1,10 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session, jsonify, send_file
+from forms import SignupForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
+from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from datetime import datetime
 import numpy as np
@@ -12,6 +15,8 @@ import io
 import base64
 import socket
 import json
+import requests
+import ollama
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -24,6 +29,7 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 from translations import TRANSLATIONS, get_text
+
 
 # -------------------- CONFIGURATION -------------------- #
 app = Flask(__name__, template_folder="templates")
@@ -62,6 +68,7 @@ print(f"Sender : {app.config['MAIL_DEFAULT_SENDER']}\n")
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
+csrf = CSRFProtect(app)
 s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # ==================== LANGUAGE MANAGEMENT ====================
@@ -75,6 +82,16 @@ def get_text_by_key(key):
     """Helper to get translated text in template"""
     lang = get_current_language()
     return get_text(key, lang)
+
+# Session-based login_required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page', 'error')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Context processor to pass language-related data to templates
 @app.context_processor
@@ -452,6 +469,37 @@ def calcul_etages_absorption_necessaires(L, G, yo, y_target):
     except Exception as e:
         return {'error': str(e)}
 
+# -------------------- AI SEARCH FUNCTION -------------------- #
+def search_web(query):
+    """
+    Search the web using SerpAPI for additional context
+    """
+    try:
+        import serpapi
+        # You'll need to set your SerpAPI key in environment or config
+        api_key = os.getenv('SERPAPI_KEY')  # Add this to your environment
+        if not api_key:
+            return "Search functionality not configured (missing SERPAPI_KEY)"
+        
+        client = serpapi.Client(api_key=api_key)
+        results = client.search({
+            "q": query,
+            "num": 3  # Limit to 3 results for context
+        })
+        
+        if 'organic_results' in results:
+            context = "\n".join([
+                f"- {result.get('title', '')}: {result.get('snippet', '')}"
+                for result in results['organic_results'][:3]
+            ])
+            return f"Web search results for '{query}':\n{context}"
+        else:
+            return f"No search results found for '{query}'"
+    except ImportError:
+        return "Search functionality not available (serpapi not installed)"
+    except Exception as e:
+        return f"Search error: {str(e)}"
+
 # -------------------- ROUTES -------------------- #
 
 # Language switcher route
@@ -508,6 +556,117 @@ def dashboard():
                          get_text=get_text)
                          
 
+# -------------------- AI CHAT ROUTES -------------------- #
+@app.route('/chat')
+@login_required
+def chat():
+    """AI Chat Assistant - only for authenticated users"""
+    lang = session.get('lang', 'fr')
+    return render_template('chat.html', lang=lang, get_text=get_text)
+
+@app.route('/chat-api', methods=['POST'])
+@login_required
+@csrf.exempt  # Exempt from CSRF since it's an API endpoint protected by session auth
+def chat_api():
+    """API endpoint for AI chat - only for authenticated users"""
+    try:
+        data = request.get_json()
+        if not data or 'message' not in data:
+            return jsonify({'error': 'Message is required'}), 400
+        
+        user_message = data['message'].strip()
+        if not user_message:
+            return jsonify({'error': 'Message cannot be empty'}), 400
+        
+        # Optional: Add web search context for better responses
+        search_context = ""
+        if len(user_message) > 10:  # Only search for longer queries
+            search_context = search_web(user_message)
+        
+        # Prepare prompt - AI can answer about anything
+        system_prompt = """You are a helpful AI assistant for "Assiyaton" - an Absorption & Desorption Calculator application.
+
+You can help users with:
+1. Questions about the application (how to use calculators, history, PDF reports, features, login, signup, etc.)
+2. Chemistry and chemical engineering concepts (absorption, desorption, McCabe-Thiele method, equilibrium, mass transfer, etc.)
+3. General science and technology questions
+
+CONFIDENTIAL - DO NOT SHARE:
+- User account information (usernames, emails, passwords)
+- Calculation results from other users
+- Admin information or system internals
+- Any personal or sensitive data
+
+If asked about confidential topics, respond: "I cannot share that information. It's confidential."
+
+GUIDELINES:
+- Be helpful, friendly, and informative
+- If you don't know something, admit it honestly
+- You can search the web for additional information when needed
+- Keep responses clear and concise
+- Feel free to engage in conversation on any topic
+
+ABOUT ASSIYATON (if asked):
+- Chemical engineering calculator using McCabe-Thiele method
+- Features: absorption calculator, desorption calculator, history, PDF reports
+- Available in English, French, Spanish
+- Requires email activation after signup
+- Has admin panel for user management
+
+Now respond helpfully to the user's question:"""
+        
+        if search_context and not search_context.startswith("Search"):
+            system_prompt += f"\n\nAdditional context from web search:\n{search_context}"
+        
+        print(f"[CHAT API] Calling Ollama with message: {user_message[:50]}...")
+        
+        # Call Ollama
+        response = ollama.chat(
+            model='llama3',
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_message}
+            ]
+        )
+        
+        ai_reply = response['message']['content']
+        print(f"[CHAT API] Ollama response: {ai_reply[:50]}...")
+        return jsonify({'reply': ai_reply})
+    
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"[CHAT API ERROR] {error_msg}")
+        print(f"[CHAT API TRACE]\n{error_trace}")
+        return jsonify({'reply': f'AI is currently unavailable: {error_msg}'}), 500
+        
+        if search_context and not search_context.startswith("Search"):
+            system_prompt += f"\n\nAdditional context from web search:\n{search_context}"
+        
+        print(f"[CHAT API] Calling Ollama with message: {user_message[:50]}...")
+        
+        # Call Ollama
+        response = ollama.chat(
+            model='llama3',
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_message}
+            ]
+        )
+        
+        ai_reply = response['message']['content']
+        print(f"[CHAT API] Ollama response: {ai_reply[:50]}...")
+        return jsonify({'reply': ai_reply})
+    
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"[CHAT API ERROR] {error_msg}")
+        print(f"[CHAT API TRACE]\n{error_trace}")
+        return jsonify({'reply': f'AI is currently unavailable: {error_msg}'}), 500
+
 @app.route('/deactivate_account')
 def deactivate_account():
     if not session.get('user_id'):
@@ -550,6 +709,7 @@ def api_dashboard_stats():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    form = SignupForm()
     lang = session.get('lang', 'fr')   # 👈 AJOUT 1 (LANGUE)
 
     if request.method == 'POST':
@@ -559,6 +719,33 @@ def signup():
         email_confirm = request.form.get('email_confirm')
         password = request.form.get('password')
         ip_address = request.remote_addr
+
+        # 🔒 CAPTCHA GOOGLE
+        captcha_response = request.form.get("g-recaptcha-response")
+        
+        # Validate reCAPTCHA
+        if not captcha_response:
+            flash("Please complete the reCAPTCHA verification.")
+            return redirect(url_for('signup'))
+        
+        # Verify reCAPTCHA with Google
+        recaptcha_secret = app.config['RECAPTCHA_PRIVATE_KEY']
+        recaptcha_verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+        recaptcha_payload = {
+            'secret': recaptcha_secret,
+            'response': captcha_response
+        }
+        
+        try:
+            recaptcha_response = requests.post(recaptcha_verify_url, data=recaptcha_payload)
+            recaptcha_result = recaptcha_response.json()
+            
+            if not recaptcha_result.get('success'):
+                flash("reCAPTCHA verification failed. Please try again.")
+                return redirect(url_for('signup'))
+        except Exception as e:
+            flash("Error verifying reCAPTCHA. Please try again.")
+            return redirect(url_for('signup'))
 
         # Validate that both emails exist and match
         if not email or not email_confirm:
@@ -765,7 +952,7 @@ def signup():
             flash("Account created but email sending failed. Please contact support.", 'warning')
         
         return redirect(url_for('login'))
-    return render_template('signup.html', lang=lang, get_text=get_text)
+    return render_template('signup.html', lang=lang, get_text=get_text, form=form)
      
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -1653,6 +1840,7 @@ def admin_panel():
         return "Access denied"
 
     users = User.query.all()
+    new_user = User.query.order_by(User.id.desc()).first()
 
     # 🔥 CORRECTION LOGIQUE
     active_users = User.query.filter(
@@ -1674,7 +1862,8 @@ def admin_panel():
         users=users,
         active_users=active_users,
         inactive_users=inactive_users,
-        banned_users=banned_users
+        banned_users=banned_users,
+        new_user=new_user
     )
 
 @app.route('/send_status_mail/<int:id>')
@@ -1728,6 +1917,129 @@ Thank you for joining us.
 Best regards,  
 Support Team
 """
+        
+        login_url = url_for('login', _external=True)
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+                    padding: 0;
+                    border-radius: 15px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+                    color: white;
+                    padding: 40px;
+                    text-align: center;
+                    border-radius: 15px 15px 0 0;
+                }}
+                .header h1 {{
+                    margin: 0;
+                    font-size: 32px;
+                    font-weight: 300;
+                    letter-spacing: 1px;
+                }}
+                .content {{
+                    background: white;
+                    padding: 40px;
+                    border-radius: 0 0 15px 15px;
+                }}
+                .greeting {{
+                    font-size: 18px;
+                    color: #2c3e50;
+                    margin-bottom: 25px;
+                }}
+                .message {{
+                    color: #555;
+                    font-size: 15px;
+                    line-height: 1.8;
+                    margin-bottom: 30px;
+                }}
+                .status-badge {{
+                    display: inline-block;
+                    background: #d4edda;
+                    color: #155724;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                    font-weight: 600;
+                    border-left: 4px solid #28a745;
+                }}
+                .login-button {{
+                    display: inline-block;
+                    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+                    color: white;
+                    padding: 15px 40px;
+                    text-decoration: none;
+                    border-radius: 30px;
+                    font-weight: 600;
+                    font-size: 16px;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(26, 188, 156, 0.4);
+                    margin: 30px 0;
+                    text-align: center;
+                }}
+                .login-button:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(26, 188, 156, 0.6);
+                }}
+                .footer {{
+                    background: #f8f9fa;
+                    padding: 25px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 12px;
+                    border-radius: 0 0 15px 15px;
+                    border-top: 1px solid #e0e0e0;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎯 Assiyaton</h1>
+                    <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Account Activated</p>
+                </div>
+                <div class="content">
+                    <div class="greeting">
+                        👋 Bienvenue, <strong>{user.firstname}</strong>!
+                    </div>
+                    <div class="message">
+                        We are pleased to inform you that your account has been successfully activated.
+                    </div>
+                    <div class="status-badge">
+                        🎉 Status: ACTIVE<br/>
+                        ✔ You now have full access to the platform.
+                    </div>
+                    <div class="message">
+                        Thank you for joining us. Click the button below to complete your connection:
+                    </div>
+                    <center>
+                        <a href="{login_url}" class="login-button">
+                            ✓ Complete Your Connection
+                        </a>
+                    </center>
+                </div>
+                <div class="footer">
+                    <p>© 2026 Assiyaton - All rights reserved</p>
+                    <p>Questions? Contact our support team</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
 
     else:
         subject = "Account Status Update - Pending Activation"
@@ -1751,8 +2063,13 @@ Support Team
         recipients=[user.email],
         body=body
     )
+    
+    # Add HTML version for activation emails
+    if user.is_active and 'html_body' in locals():
+        msg.html = html_body
 
     mail.send(msg)
+    flash("Mail sent successfully to the user!", 'success')
 
     return redirect('/admin')
 
@@ -1789,6 +2106,14 @@ def make_admin(id):
     user.is_admin = True
     db.session.commit()
     return redirect('/admin')
+
+# 🔥 👉 AJOUTE ICI
+@app.route('/guide')
+def guide():
+    if not session.get('user_id'):
+         return redirect(url_for('login'))
+    return render_template('guide.html')
+
 
 @app.route('/edit_user/<int:id>', methods=['GET', 'POST'])
 def edit_user(id):
@@ -1832,6 +2157,82 @@ def reset_users_logic():
 
     db.session.commit()
     return "Database logic fixed"
+
+def get_contributors():
+    return [
+        {
+            'slug': 'douha-elangoud',
+            'name': 'Douha Elangoud',
+            'role': 'Développeuse Back-end',
+            'bio': 'Douha est une développeuse back-end spécialisée en Python et Flask. Elle a conçu et implémenté le système d\'authentification, la gestion des utilisateurs et la base de données de l\'application.',
+            'skills': ['Python', 'Flask', 'SQLAlchemy', 'PostgreSQL', 'API REST'],
+            'linkedin': 'https://www.linkedin.com/in/douha-elangoud-821908312/',
+            'github': 'https://github.com/Douhaelangoud',
+            'photo': 'douha-elangoud.jpg'
+        },
+        {
+            'slug': 'assiya-elkhayati',
+            'name': 'Assiya Elkhayati',
+            'role': 'Chef de Projet & Fullstack',
+            'bio': 'Assiya a dirigé l\'ensemble du projet, coordonné l\'équipe et assuré la qualité du produit final. Elle a également contribué au développement front-end et à l\'intégration des composants.',
+            'skills': ['JavaScript', 'HTML/CSS', 'Bootstrap', 'Gestion de projet', 'UI/UX'],
+            'linkedin': 'https://www.linkedin.com/in/assiya-elkhayati-318b4721a/',
+            'github': 'https://github.com/Elkhayatiassiya',
+            'photo': 'assiya-elkhayati.jpg'
+        },
+        {
+            'slug': 'axelle-tankoano',
+            'name': 'Axelle Tankoano',
+            'role': 'UI/UX Designer',
+            'bio': 'Axelle a conçu l\'interface utilisateur et l\'expérience utilisateur de l\'application. Elle a créé le design moderne et intuitif que vous voyez aujourd\'hui.',
+            'skills': ['Figma', 'Adobe XD', 'Design System', 'Prototyping', 'User Research'],
+            'linkedin': 'https://www.linkedin.com/in/annick-axelle-tankoano-6a46a8299/',
+            'github': 'https://github.com/Tankoano-Annick-Axelle',
+            'photo': 'axelle-tankoano.jpg'
+        },
+        {
+            'slug': 'wissal-achehab',
+            'name': 'Wissal Achehab',
+            'role': 'Développeuse Front-end',
+            'bio': 'Wissal a développé l\'interface utilisateur interactive, un logiciel pour le dimensionnment des colonnes et du cout energétique, implémenté les formulaires dynamiques et assuré la compatibilité cross-browser de l\'application.',
+            'skills': ['JavaScript', 'React', 'HTML5', 'CSS3', 'Responsive Design'],
+            'linkedin': 'https://www.linkedin.com/in/wissal-achehab-a8a229340/',
+            'github': 'https://github.com/ACHEHAB-WISSAL',
+            'photo': 'wissal-achehab.jpg'
+        },
+        {
+            'slug': 'soumaya-afoussi',
+            'name': 'Soumaya Afoussi',
+            'role': 'Analyste Qualité',
+            'bio': 'Soumaya a effectué les tests fonctionnels, l\'assurance qualité et la validation des fonctionnalités. Elle a contribué à l\'optimisation des performances et de l\'expérience utilisateur.',
+            'skills': ['Testing', 'QA', 'Selenium', 'Performance Testing', 'User Acceptance Testing'],
+            'linkedin': 'https://www.linkedin.com/in/soumya-afoussi-189347314/',
+            'github': 'https://github.com/soumyaafoussi0224',
+            'photo': 'soumaya-afoussi.jpg'
+        }
+    ]
+
+@app.route('/contributors')
+def contributors():
+    return render_template('contributors.html', contributors=get_contributors())
+
+@app.route('/contributors/github')
+def contributors_github():
+    return render_template('contributors_github.html', contributors=get_contributors())
+
+@app.route('/contributors/<slug>')
+def contributor_profile(slug):
+    contributor = next((c for c in get_contributors() if c['slug'] == slug), None)
+    if not contributor:
+        return render_template('404.html'), 404
+    return render_template('contributor_profile.html', contributor=contributor)
+
+@app.route('/contributors/github/<slug>')
+def contributor_github_profile(slug):
+    contributor = next((c for c in get_contributors() if c['slug'] == slug), None)
+    if not contributor:
+        return render_template('404.html'), 404
+    return render_template('contributor_github_profile.html', contributor=contributor)
 
 if __name__ == '__main__':
     # Test SMTP au démarrage

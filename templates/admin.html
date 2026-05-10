@@ -53,6 +53,21 @@
     <h2>ADMIN PANEL</h2>
 </div>
 
+{% if new_user %}
+<div class="alert alert-warning text-center mt-3">
+    🔔 New user registered: {{ new_user.username }}
+</div>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-success text-center mt-3">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
 
 <!-- 📊 STATS -->
 <div class="row mt-4 text-center">

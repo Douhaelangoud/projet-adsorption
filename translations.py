@@ -8,6 +8,7 @@ TRANSLATIONS = {
         
         # Navigation
         'dashboard': 'Tableau de bord',
+        'chat_assistant': 'Assistant IA',
         'absorption': 'Absorption',
         'desorption': 'Désorption',
         'history': 'Historique',
@@ -117,6 +118,12 @@ TRANSLATIONS = {
         'filter_by_period': 'Filtrer par période',
         'users_joined': 'Utilisateurs inscrits',
         'already_have_account': 'Vous avez déjà un compte?',
+        
+        # AI Chat
+        'ai_assistant': 'Assistant IA',
+        'ai_assistant_description': 'Votre assistant intelligent pour les calculs d\'absorption et de désorption',
+        'type_message': 'Tapez votre message...',
+        'just_now': 'À l\'instant',
     },
     'en': {
         # App name and general
@@ -126,6 +133,7 @@ TRANSLATIONS = {
         
         # Navigation
         'dashboard': 'Dashboard',
+        'chat_assistant': 'AI Assistant',
         'absorption': 'Absorption',
         'desorption': 'Desorption',
         'history': 'History',
@@ -235,6 +243,12 @@ TRANSLATIONS = {
         'already_have_account': 'Already have an account?',
         'deactivate_account': 'Deactivate my account',
         'confirm_deactivate': 'Are you sure you want to deactivate your account?',
+        
+        # AI Chat
+        'ai_assistant': 'AI Assistant',
+        'ai_assistant_description': 'Your intelligent assistant for absorption and desorption calculations',
+        'type_message': 'Type your message...',
+        'just_now': 'Just now',
     },
     'es': {
         # App name and general
@@ -244,6 +258,7 @@ TRANSLATIONS = {
         
         # Navigation
         'dashboard': 'Panel de control',
+        'chat_assistant': 'Asistente IA',
         'absorption': 'Absorción',
         'desorption': 'Desorción',
         'history': 'Historial',
@@ -353,6 +368,12 @@ TRANSLATIONS = {
         'already_have_account': '¿Ya tienes una cuenta?',
         'deactivate_account': 'Desactivar mi cuenta',
         'confirm_deactivate': '¿Está seguro de que quiere desactivar su cuenta?',
+        
+        # AI Chat
+        'ai_assistant': 'Asistente IA',
+        'ai_assistant_description': 'Su asistente inteligente para cálculos de absorción y desorción',
+        'type_message': 'Escriba su mensaje...',
+        'just_now': 'Ahora mismo',
     }
 }
 

@@ -502,6 +502,7 @@
         <div class="signup-form" id="signupForm">
             <h2 class="question-title">Create Your Account</h2>
             <form method="POST" action="{{ url_for('signup') }}" id="registrationForm">
+                {{ form.hidden_tag() }}
                 <input type="hidden" name="referral_source" id="referralSource">
                 <input type="hidden" name="field" id="userField">
                 <input type="hidden" name="education_level" id="educationLevel">
@@ -552,6 +553,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 🔒 CAPTCHA (AJOUT ICI EXACTEMENT) -->
+                 <div class="form-group" style="margin-top: 15px;">
+                    {{ form.recaptcha }}
+                 </div>
                 
                 <div class="nav-buttons">
                     <button class="btn btn-outline" id="backToQuestion3" type="button"><i class="bi bi-arrow-left"></i> Back</button>
@@ -842,5 +848,8 @@
             }
         });
     </script>
+
+    <!-- reCAPTCHA API -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 </html>

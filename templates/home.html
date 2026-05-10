@@ -74,12 +74,18 @@
             <a href="{{ url_for('formulaire') }}" class="btn btn-primary">
                 <i class="bi bi-cloud-upload"></i> {{ gettext('desorption') }}
             </a>
+            <a href="{{ url_for('chat') }}" class="btn btn-info">
+                <i class="bi bi-chat-dots"></i> {{ gettext('chat_assistant') }}
+            </a>
         {% else %}
             <a href="{{ url_for('login') }}" class="btn btn-primary">
                 <i class="bi bi-box-arrow-in-right"></i> {{ gettext('login') }}
             </a>
             <a href="{{ url_for('signup') }}" class="btn btn-secondary">
                 <i class="bi bi-person-plus"></i> {{ gettext('signup') }}
+            </a>
+            <a href="{{ url_for('chat') }}" class="btn btn-info">
+                <i class="bi bi-chat-dots"></i> {{ gettext('chat_assistant') }}
             </a>
         {% endif %}
     </div>

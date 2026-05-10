@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ app_name }} - {{ gettext('app_subtitle') }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -622,10 +623,10 @@
                 {{ gettext('social_links') }}
             </div>
             <div class="social-links">
-                <a href="https://linkedin.com" target="_blank" title="LinkedIn">
+                <a href="{{ url_for('contributors') }}" title="Contributors on LinkedIn">
                     <i class="bi bi-linkedin"></i>
                 </a>
-                <a href="https://github.com" target="_blank" title="GitHub">
+                <a href="{{ url_for('contributors_github') }}" title="Contributors on GitHub">
                     <i class="bi bi-github"></i>
                 </a>
                 <a href="https://twitter.com" target="_blank" title="Twitter">
@@ -653,6 +654,7 @@
                     <i class="bi bi-clock-history"></i> {{ gettext('history') }}
                 </a>
                 <form method="POST" action="{{ url_for('logout') }}" style="padding: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="logout-btn">
                         <i class="bi bi-box-arrow-right"></i> {{ gettext('logout') }}
                     </button>

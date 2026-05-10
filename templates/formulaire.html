@@ -440,7 +440,13 @@
         }
 
         function logout() {
-            fetch('/logout', { method: 'POST' });
+            const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': token
+                }
+            });
             window.location.href = '/';
         }
     </script>

@@ -327,6 +327,7 @@
                     <i class="bi bi-arrow-left"></i> Back to Dashboard
                 </a>
                 <form method="POST" action="/logout" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-logout" onclick="return confirm('Are you sure?')">
                         <i class="bi bi-box-arrow-right"></i> Logout
                     </button>
